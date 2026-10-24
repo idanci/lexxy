@@ -37,6 +37,26 @@ for (const [ description, path ] of Object.entries(pages)) {
       await expect(page.locator("#simple lexxy-toolbar")).toHaveCount(0)
     })
 
+    test("prompts work in rebuilt editors", async ({ page }) => {
+      const mention = new EditorHandle(page, "#mention")
+
+      await page.goto(path)
+      await waitForEditors(page)
+
+      await mention.send(" @")
+      await expect(page.locator(".lexxy-prompt-menu--visible")).toBeVisible()
+      await mention.send("Enter")
+
+      await expect(mention.content.locator("bc-attachment")).toHaveCount(2)
+    })
+
+    test("rebuilt editors keep their tab order", async ({ page }) => {
+      await page.goto(path)
+      await waitForEditors(page)
+
+      await expect(page.locator("#plain .lexxy-editor__content")).toHaveAttribute("tabindex", "-1")
+    })
+
     test("rebuilt editors keep a single toolbar", async ({ page }) => {
       await page.goto(path)
       await waitForEditors(page)

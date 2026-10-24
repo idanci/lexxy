@@ -63,4 +63,17 @@ test.describe("tabindex", () => {
 
     await expect(editor.content).toHaveAttribute("tabindex", "0")
   })
+
+  test("keeps the value when the editor is moved", async ({ page, editor }) => {
+    await page.goto("/attribute-transfer.html")
+    await editor.waitForConnected()
+
+    await page.evaluate(() => {
+      const el = document.querySelector("lexxy-editor")
+      el.parentElement.appendChild(el)
+    })
+    await editor.waitForConnected()
+
+    await expect(editor.content).toHaveAttribute("tabindex", "3")
+  })
 })

@@ -64,6 +64,7 @@ export class LexicalEditorElement extends HTMLElement {
   #editorInitializedDispatched = false
   #mountFrame
   #defaultToolbar
+  #contentTabIndex = 0
   #listeners = new ListenerBin()
   #disposables = []
   #historyState = { undo: false, redo: false }
@@ -135,10 +136,16 @@ export class LexicalEditorElement extends HTMLElement {
     this.#reset() // Prevent hangs with Safari when morphing
   }
 
+  // Taking the editor out of the page and putting it back reconnects its children too, such as prompts that listen
+  // to the Lexical editor it replaces.
   reconfigure() {
+    const { parentNode, nextSibling } = this
+
     cancelAnimationFrame(this.#mountFrame)
     this.#defaultToolbar?.remove()
-    this.#reconnect()
+    this.remove()
+    this.valueBeforeDisconnect = null
+    parentNode.insertBefore(this, nextSibling)
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -522,7 +529,7 @@ export class LexicalEditorElement extends HTMLElement {
     this.#ariaAttributes.forEach(attribute => editorContentElement.setAttribute(attribute.name, attribute.value))
 
     this.#transferAttributeToContentEditable(editorContentElement, "autocapitalize")
-    this.#transferAttributeToContentEditable(editorContentElement, "tabindex", { defaultValue: 0, removeSource: true })
+    this.#transferAttributeToContentEditable(editorContentElement, "tabindex", { defaultValue: this.#contentTabIndex, removeSource: true })
 
     return editorContentElement
   }
@@ -978,7 +985,11 @@ export class LexicalEditorElement extends HTMLElement {
     this.#dispose()
     this.#resetValidity()
     this.#uploadRequests?.clear()
-    this.editorContentElement?.remove()
+
+    if (this.editorContentElement) {
+      this.#contentTabIndex = this.contentTabIndex
+      this.editorContentElement.remove()
+    }
     this.editorContentElement = null
 
     // Prevents issues with turbo morphing receiving an empty <lexxy-editor> which wipes

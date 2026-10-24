@@ -19,8 +19,14 @@
         placeholder="Write something..."
         attachments="true"
         value='<p>Hello <bc-attachment sgid="test-sgid-alice" content-type="application/vnd.basecamp.mention" content="Alice"></bc-attachment></p>'>
+        <lexxy-prompt trigger="@" name="mention">
+          <lexxy-prompt-item search="Bob" sgid="test-sgid-bob">
+            <template type="menu">Bob</template>
+            <template type="editor" content-type="application/vnd.basecamp.mention">Bob</template>
+          </lexxy-prompt-item>
+        </lexxy-prompt>
       </lexxy-editor>
-      <lexxy-editor id="plain" class="lexxy-content" placeholder="Write something..."></lexxy-editor>
+      <lexxy-editor id="plain" class="lexxy-content" placeholder="Write something..." tabindex="-1"></lexxy-editor>
       <lexxy-editor id="simple" class="lexxy-content" placeholder="Write something..." preset="simple"></lexxy-editor>
     </div>
   </form>
